@@ -341,5 +341,5 @@ if __name__ == '__main__':
     add_Elam(dest, overwrite=args.force, silent=args.silent)
     add_Waasmaier(dest, append=True)
     add_KeskiRahkonen_Krause(dest, append=True)
-    add_Chantler(dest, table='Chantler_orig', append=True)
+    add_Chantler(dest, table='Chantler_coarse', append=True)
     add_Chantler(dest, table='Chantler', suffix='_fine.dat', append=True)
