@@ -92,7 +92,7 @@ def add_Waasmaier(dest, append=True):
     conn.commit()
     c.close()
 
-def add_Chantler(dest, append=True):
+def add_Chantler(dest, append=True, table='Chantler', suffix='.dat'):
     """add f' / f'', mu data from Chantler"""
     dirname = 'chantler'
 
@@ -102,18 +102,18 @@ def add_Chantler(dest, append=True):
     conn = sqlite3.connect(dest)
     c = conn.cursor()
     c.execute(
-        '''create table Chantler (id integer primary key,
+        '''create table %s (id integer primary key,
         element text, sigma_mu real, mue_f2 real, density real,
         corr_henke float, corr_cl35 float, corr_nucl float,
         energy text, f1 text, f2 text, mu_photo text,
         mu_incoh text, mu_total text)
-        ''')
+        ''' % table)
 
     args = '(%s)' % ','.join(['?']*14)
 
     nelem = 92
     for z in range(1, nelem+1):
-        fname = os.path.join(dirname, '%2.2i.dat' % z)
+        fname = os.path.join(dirname, '%2.2i%s' % (z, suffix))
         lines = open(fname, 'r').readlines()
 
         # line 1: take symbol and density only
@@ -152,7 +152,9 @@ def add_Chantler(dest, append=True):
             mu_incoh.append(words[4])
             mu_total.append(words[5])
 
-        c.execute('insert into Chantler values %s' % args,
+        query = 'insert into %s values %%s' % table
+            
+        c.execute(query % args,
                   (z, elem, sigma_mu, mue_f2, density,
                    corr_henke, corr_cl35, corr_nucl,
                    json.dumps(en), json.dumps(f1), json.dumps(f2),
@@ -339,4 +341,5 @@ if __name__ == '__main__':
     add_Elam(dest, overwrite=args.force, silent=args.silent)
     add_Waasmaier(dest, append=True)
     add_KeskiRahkonen_Krause(dest, append=True)
-    add_Chantler(dest, append=True)
+    add_Chantler(dest, table='Chantler_orig', append=True)
+    add_Chantler(dest, table='Chantler', suffix='_fine.dat', append=True)
